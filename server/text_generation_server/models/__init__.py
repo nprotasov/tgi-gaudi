@@ -15,6 +15,9 @@ from text_generation_server.models.model import Model
 from text_generation_server.models.causal_lm import CausalLM
 from text_generation_server.models.bloom import BLOOM
 from text_generation_server.models.starcoder import StarCoder
+from text_generation_server.models.flash_causal_lm import FlashCausalLM
+
+from text_generation_server.models.flash_gemma import (FlashGemma)
 
 from optimum.habana.transformers.modeling_utils import adapt_transformers_to_gaudi
 
@@ -96,6 +99,24 @@ def get_model(
             dtype=dtype,
             trust_remote_code=trust_remote_code,
         )
+
+    FLASH_ATTENTION = False
+    
+    if model_type == "gemma":
+        if FLASH_ATTENTION:
+            return FlashGemma(
+                model_id,
+                revision,
+                dtype=dtype,
+                trust_remote_code=trust_remote_code,
+            )
+        else:
+            return CausalLM(
+                    model_id,
+                    revision,
+                    dtype=dtype,
+                    trust_remote_code=trust_remote_code,
+                )
 
     if model_type in modeling_auto.MODEL_FOR_CAUSAL_LM_MAPPING_NAMES:
         return CausalLM(
